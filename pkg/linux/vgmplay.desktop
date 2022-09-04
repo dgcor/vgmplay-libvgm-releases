@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=VGMPlay
+GenericName=VGMPlay
+Exec=vgmplay
+Icon=icon
+Terminal=true
+Type=Application
+X-DCOP-ServiceType=Multi
+X-KDE-StartupNotify=true
+Categories=Utility;

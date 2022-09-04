@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Player
+GenericName=Player
+Exec=player
+Icon=icon
+Terminal=true
+Type=Application
+X-DCOP-ServiceType=Multi
+X-KDE-StartupNotify=true
+Categories=Utility;
