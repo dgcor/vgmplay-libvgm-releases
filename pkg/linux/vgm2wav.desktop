@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=VGM2WAV
+GenericName=VGM2WAV
+Exec=vgm2wav
+Icon=icon
+Terminal=true
+Type=Application
+X-DCOP-ServiceType=Multi
+X-KDE-StartupNotify=true
+Categories=Utility;

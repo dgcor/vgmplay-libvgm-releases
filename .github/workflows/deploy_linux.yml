@@ -1,0 +1,91 @@
+name: Deploy_Linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_linux:
+    name: linux deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout vgmplay-libvgm
+      uses: actions/checkout@v3
+      with:
+        repository: ValleyBell/vgmplay-libvgm
+        submodules: true
+
+    - name: Install dependencies
+      run: |
+        sudo apt install -yq --no-install-suggests --no-install-recommends libao-dev libasound2-dev libinih-dev libpulse-dev zlib1g-dev > /dev/null
+
+    - name: Setup Ninja Build
+      uses: turtlesec-no/get-ninja@main
+
+    - name: CMake build
+      run: |
+        cmake libvgm/CMakeLists.txt -B libvgm/build -G "Ninja"
+        cmake --build libvgm/build --config Release
+        cmake CMakeLists.txt -B build -G "Ninja" -DCMAKE_MODULE_PATH=libvgm/build
+        cmake --build build --config Release
+
+    - name: Download packaging
+      run: |
+        wget https://github.com/dgcor/vgmplay-libvgm-releases/archive/refs/heads/master.zip -N
+        unzip master.zip
+        mv vgmplay-libvgm-releases-master/pkg pkg
+        rm -R vgmplay-libvgm-releases-master
+
+    - name: Install LinuxDeploy
+      run: |
+        wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -N
+        chmod +x linuxdeploy-x86_64.AppImage
+
+    - name: Create player AppImage
+      run: |
+        ./linuxdeploy-x86_64.AppImage \
+          --executable=libvgm/build/bin/player \
+          --appdir appdir_player \
+          --desktop-file=pkg/linux/player.desktop \
+          --icon-file=pkg/linux/icon.png \
+          --output=appimage
+        mv Player-*-x86_64.AppImage player
+
+    - name: Create vgm2wav AppImage
+      run: |
+        ./linuxdeploy-x86_64.AppImage \
+          --executable=libvgm/build/bin/vgm2wav \
+          --appdir appdir_vgm2wav \
+          --desktop-file=pkg/linux/vgm2wav.desktop \
+          --icon-file=pkg/linux/icon.png \
+          --output=appimage
+        mv VGM2WAV-*-x86_64.AppImage vgm2wav
+
+    - name: Create vgmplay AppImage
+      run: |
+        ./linuxdeploy-x86_64.AppImage \
+          --executable=build/vgmplay \
+          --appdir appdir_vgmplay \
+          --desktop-file=pkg/linux/vgmplay.desktop \
+          --icon-file=pkg/linux/icon.png \
+          --output=appimage
+        mv VGMPlay-*-x86_64.AppImage vgmplay
+
+    - name: Create player artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: player-x86_64.AppImage
+        path: player
+
+    - name: Create vgm2wav artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: vgm2wav-x86_64.AppImage
+        path: vgm2wav
+
+    - name: Create vgmplay artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: vgmplay-x86_64.AppImage
+        path: |
+          vgmplay
+          VGMPlay.ini
